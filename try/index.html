@@ -1,0 +1,2144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nutrition Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --primary-light: #81C784;
+            --primary-dark: #388E3C;
+            --text: #333333;
+            --text-light: #666666;
+            --bg: #f4f9f4;
+            --card-bg: #ffffff;
+            --border: #e0e0e0;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --hover-bg: rgba(0, 0, 0, 0.05);
+            --input-bg: #ffffff;
+            --input-border: #e0e0e0;
+            --progress-bg: #e0e0e0;
+            --progress-good: #4caf50;
+            --progress-over: #f44336;
+            --progress-under: #4CAF50;
+            --overlay-bg: rgba(0, 0, 0, 0.5);
+            --modal-bg: #ffffff;
+            --modal-border: #e0e0e0;
+            --button-bg: #4CAF50;
+            --button-text: #ffffff;
+            --button-hover: #81C784;
+            --button-secondary-bg: #e0e0e0;
+            --button-secondary-text: #333333;
+            --button-secondary-hover: #d0d0d0;
+        }
+
+        .dark-mode {
+            --primary: #66BB6A;
+            --primary-light: #81C784;
+            --primary-dark: #388E3C;
+            --text: #ffffff;
+            --text-light: #cccccc;
+            --bg: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --border: #404040;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --hover-bg: rgba(255, 255, 255, 0.05);
+            --input-bg: #2d2d2d;
+            --input-border: #404040;
+            --progress-bg: #404040;
+            --progress-good: #66BB6A;
+            --progress-over: #EF5350;
+            --progress-under: #66BB6A;
+            --overlay-bg: rgba(0, 0, 0, 0.7);
+            --modal-bg: #2d2d2d;
+            --modal-border: #404040;
+            --button-bg: #66BB6A;
+            --button-text: #ffffff;
+            --button-hover: #81C784;
+            --button-secondary-bg: #404040;
+            --button-secondary-text: #ffffff;
+            --button-secondary-hover: #505050;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            transition: var(--transition);
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        /* Daily Food Log Panel */
+        .food-log-panel {
+            width: 300px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border);
+        }
+
+        .food-log-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: var(--text);
+        }
+
+        .nutrient-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .nutrient-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nutrient-label {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .nutrient-value {
+            color: var(--text-light);
+        }
+
+        .btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-light);
+        }
+
+        .btn-danger {
+            background: #f44336;
+            color: white;
+            margin-top: auto;
+        }
+
+        .btn-danger:hover {
+            background: #e53935;
+        }
+
+        /* Chat Panel */
+        .chat-panel {
+            flex-grow: 1;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .theme-toggle {
+            background: var(--hover-bg);
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background: var(--hover-bg);
+            transform: scale(1.1);
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.5;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background: var(--primary);
+            color: white;
+        }
+
+        .chat-input {
+            padding: 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+        }
+
+        .message-input {
+            flex-grow: 1;
+            padding: 12px;
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            outline: none;
+            background: var(--input-bg);
+            color: var(--text);
+            transition: var(--transition);
+        }
+
+        .message-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary-light);
+        }
+
+        .send-btn {
+            padding: 12px 24px;
+            background: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .send-btn:hover {
+            background: var(--button-hover);
+        }
+
+        /* Nutrition Card */
+        .nutrition-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .nutrition-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .nutrition-title {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .nutrition-macros {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .macro-item {
+            text-align: center;
+            padding: 8px;
+            background: var(--bg);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .macro-value {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .macro-label {
+            font-size: 0.9em;
+            color: var(--text-light);
+        }
+
+        .goal-form {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--modal-bg);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid var(--modal-border);
+        }
+
+        .goal-form-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--overlay-bg);
+            z-index: 999;
+        }
+
+        .goal-form h2 {
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--input-border);
+            border-radius: 4px;
+            background: var(--input-bg);
+            color: var(--text);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .form-actions button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .nutrient-progress {
+            height: 4px;
+            background: var(--progress-bg);
+            border-radius: 2px;
+            margin-top: 4px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-under {
+            background: var(--progress-under);
+        }
+
+        .progress-good {
+            background: var(--progress-good);
+        }
+
+        .progress-over {
+            background: var(--progress-over);
+        }
+
+        .nutrient-value {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nutrient-goal {
+            font-size: 0.8em;
+            color: var(--text-light);
+            margin-top: 2px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .view-details-btn, .log-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: var(--transition);
+        }
+
+        .view-details-btn:hover, .log-btn:hover {
+            background: var(--primary-light);
+            transform: translateY(-1px);
+        }
+
+        .quick-suggestions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .suggestion-btn {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9em;
+        }
+
+        .suggestion-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .chat-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(100vh - 140px);
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.5;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background: var(--primary);
+            color: white;
+        }
+
+        .nutrition-card {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .quick-suggestions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+                width: 100%;
+        }
+
+        .suggestion-btn {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+
+        .nutrition-tip {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .portion-form-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--overlay-bg);
+            z-index: 999;
+        }
+
+        .portion-form {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--modal-bg);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .portion-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 16px 0;
+        }
+
+        .portion-option {
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            cursor: pointer;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .portion-option:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .portion-option.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .custom-portion {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .custom-portion input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .custom-portion select {
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--bg);
+            color: var(--text);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Daily Food Log Panel -->
+        <div class="food-log-panel">
+            <h1 class="food-log-title">Daily Food Log</h1>
+            <div class="nutrient-list">
+                <div class="nutrient-item">
+                    <span class="nutrient-label">Calories</span>
+                    <span class="nutrient-value" id="total-calories">0 kcal</span>
+                </div>
+                <div class="nutrient-item">
+                    <span class="nutrient-label">Protein</span>
+                    <span class="nutrient-value" id="total-protein">0g</span>
+                </div>
+                <div class="nutrient-item">
+                    <span class="nutrient-label">Carbs</span>
+                    <span class="nutrient-value" id="total-carbs">0g</span>
+            </div>
+                <div class="nutrient-item">
+                    <span class="nutrient-label">Fat</span>
+                    <span class="nutrient-value" id="total-fat">0g</span>
+                </div>
+                </div>
+            <button class="btn btn-primary" onclick="setGoals()">Set Goals</button>
+            <button class="btn btn-danger" onclick="resetDailyLog()">Reset Daily Log</button>
+        </div>
+        
+        <!-- Chat Panel -->
+        <div class="chat-panel">
+            <div class="chat-header">
+                <h1 class="chat-title">Nutrition Assistant</h1>
+                <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">
+                    <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+                </div>
+                <div class="chat-messages" id="chat-messages">
+                    <div class="message bot-message">
+                <p>🥗 Welcome to your Nutrition Assistant!</p>
+                <p>I can help you with:</p>
+                <ul style="margin: 8px 0 8px 20px;">
+                    <li>Get nutrition facts for any food</li>
+                    <li>Find cooking instructions</li>
+                    <li>Track your daily food intake</li>
+                    <li>Learn about food benefits</li>
+                        </ul>
+                <p>What would you like to know?</p>
+                <div class="quick-suggestions">
+                    <button class="suggestion-btn" onclick="handleSuggestion('search food')">
+                        <i class="fas fa-search"></i> Search Food
+                    </button>
+                    <button class="suggestion-btn" onclick="handleSuggestion('food tips')">
+                        <i class="fas fa-lightbulb"></i> Food Tips
+                    </button>
+                    <button class="suggestion-btn" onclick="handleSuggestion('log food')">
+                        <i class="fas fa-utensils"></i> Log Food
+                        </button>
+                    </div>
+                        </div>
+                    </div>
+            <div class="chat-input">
+                    <input type="text" class="message-input" id="message-input" placeholder="Type your message...">
+                <button class="send-btn" onclick="sendMessage()">Send</button>
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_CONFIG = {
+            huggingface: {
+                apiKey: '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',
+                baseUrl: 'https://api-inference.huggingface.co/models'
+            },
+            usda: {
+                apiKey: 'T7Yg5sUNfbB2bt44mPg3kd5wFSJS1hpUSFWp18g6',
+                baseUrl: 'https://api.nal.usda.gov/fdc/v1'
+            },
+            wikipedia: {
+                baseUrl: 'https://en.wikipedia.org/w/api.php'
+            }
+        };
+
+        // DOM Elements
+        const chatMessages = document.getElementById('chat-messages');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.querySelector('.send-btn');
+        const themeToggle = document.querySelector('.theme-toggle');
+
+        // Nutrition Data
+        let nutritionData = {
+            dailyLog: [],
+            goals: {
+                calories: 2000,
+                protein: 75,
+                carbs: 250,
+                fat: 65
+            }
+        };
+
+        // Common foods fallback data
+        const commonFoods = {
+            'apple': {
+                name: 'Apple',
+                nutrients: {
+                    calories: { value: 95, unit: 'kcal' },
+                    protein: { value: 0.5, unit: 'g' },
+                    carbs: { value: 25, unit: 'g' },
+                    fat: { value: 0.3, unit: 'g' },
+                    fiber: { value: 4.4, unit: 'g' },
+                    sugar: { value: 19, unit: 'g' },
+                    vitaminC: { value: 8.4, unit: 'mg' }
+                },
+                description: 'Apples are a popular fruit, containing antioxidants, vitamins, and dietary fiber. They are known for their health benefits including improved heart health and reduced risk of chronic diseases.'
+            },
+            'banana': {
+                name: 'Banana',
+                nutrients: {
+                    calories: { value: 105, unit: 'kcal' },
+                    protein: { value: 1.3, unit: 'g' },
+                    carbs: { value: 27, unit: 'g' },
+                    fat: { value: 0.4, unit: 'g' },
+                    fiber: { value: 3.1, unit: 'g' },
+                    potassium: { value: 422, unit: 'mg' },
+                    vitaminB6: { value: 0.4, unit: 'mg' }
+                },
+                description: 'Bananas are rich in potassium and fiber. They are a great source of energy and can help regulate blood pressure and support heart health.'
+            },
+            'chicken breast': {
+                name: 'Chicken Breast',
+                nutrients: {
+                    calories: { value: 165, unit: 'kcal' },
+                    protein: { value: 31, unit: 'g' },
+                    carbs: { value: 0, unit: 'g' },
+                    fat: { value: 3.6, unit: 'g' },
+                    cholesterol: { value: 85, unit: 'mg' },
+                    sodium: { value: 74, unit: 'mg' }
+                },
+                description: 'Chicken breast is a lean source of protein, low in fat and calories. It\'s rich in essential amino acids and nutrients like niacin and selenium.'
+            }
+        };
+
+        // Add more comprehensive food tips data
+        const nutritionTipsData = {
+            'healthy eating': {
+                title: 'Healthy Eating Tips',
+                tips: [
+                    // General Healthy Eating
+                    ['Eat a variety of colorful fruits and vegetables daily',
+                     'Choose whole grains over refined grains',
+                     'Include lean proteins in your diet',
+                     'Limit processed foods and added sugars',
+                     'Stay hydrated by drinking plenty of water',
+                     'Practice mindful eating and portion control',
+                     'Include healthy fats from avocados and nuts',
+                     'Plan your meals ahead of time'],
+                    // Meal Planning
+                    ['Prep your meals for the week in advance',
+                     'Read nutrition labels carefully',
+                     'Cook more meals at home',
+                     'Use herbs and spices instead of salt',
+                     'Eat slowly and mindfully',
+                     'Listen to your body\'s hunger signals',
+                     'Keep healthy snacks readily available',
+                     'Practice the 80/20 rule - eat healthy 80% of the time'],
+                    // Nutrition Balance
+                    ['Fill half your plate with vegetables',
+                     'Choose lean proteins for every meal',
+                     'Include a variety of whole grains',
+                     'Limit added sugars and processed foods',
+                     'Eat fresh fruits for snacks',
+                     'Include fermented foods for gut health',
+                     'Choose healthy cooking methods like steaming or grilling',
+                     'Balance your macronutrients in each meal']
+                ]
+            },
+            'protein rich foods': {
+                title: 'Protein-Rich Foods Guide',
+                tips: [
+                    // Animal Proteins
+                    ['Lean meats: chicken, turkey, and lean beef',
+                     'Fish: salmon, tuna, and sardines',
+                     'Eggs: excellent source of complete protein',
+                     'Dairy: Greek yogurt and cottage cheese',
+                     'Seafood: shrimp, cod, and tilapia',
+                     'Game meats: bison and venison',
+                     'Poultry: duck and turkey',
+                     'Low-fat dairy products'],
+                    // Plant Proteins
+                    ['Legumes: lentils, chickpeas, and black beans',
+                     'Nuts: almonds, walnuts, and pistachios',
+                     'Seeds: chia, pumpkin, and hemp seeds',
+                     'Whole grains: quinoa and amaranth',
+                     'Plant-based: tofu and tempeh',
+                     'Seitan and textured vegetable protein',
+                     'Edamame and green peas',
+                     'Plant-based protein powders'],
+                    // Protein Combinations
+                    ['Rice and beans for complete protein',
+                     'Hummus and whole grain pita',
+                     'Nut butter and whole grain bread',
+                     'Quinoa and legume bowls',
+                     'Greek yogurt with nuts and seeds',
+                     'Tofu stir-fry with brown rice',
+                     'Lentil soup with whole grain crackers',
+                     'Mixed bean and grain salads']
+                ]
+            },
+            'weight loss': {
+                title: 'Weight Loss Tips',
+                tips: [
+                    // Diet Strategies
+                    ['Create a sustainable calorie deficit',
+                     'Increase protein intake for muscle retention',
+                     'Include fiber-rich foods for satiety',
+                     'Stay active with regular exercise',
+                     'Get adequate sleep for recovery',
+                     'Manage stress levels effectively',
+                     'Track your food intake consistently',
+                     'Stay consistent with healthy habits'],
+                    // Practical Tips
+                    ['Use smaller plates for portion control',
+                     'Drink water before meals to feel fuller',
+                     'Eat protein with every meal',
+                     'Plan your meals in advance',
+                     'Keep healthy snacks available',
+                     'Avoid eating late at night',
+                     'Read nutrition labels carefully',
+                     'Cook more meals at home'],
+                    // Lifestyle Changes
+                    ['Make gradual, sustainable changes',
+                     'Focus on nutrition, not just calories',
+                     'Find exercises you enjoy',
+                     'Get support from friends and family',
+                     'Set realistic, achievable goals',
+                     'Celebrate non-scale victories',
+                     'Practice mindful eating',
+                     'Keep a food and exercise journal']
+                ]
+            }
+        };
+
+        // Initialize Chatbot
+        function initChatbot() {
+            // Event Listeners
+            sendBtn.addEventListener('click', sendMessage);
+            messageInput.addEventListener('keypress', (e) => e.key === 'Enter' && sendMessage());
+            themeToggle.addEventListener('click', toggleTheme);
+
+            // Load theme preference
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark-mode');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            }
+
+            // Auto-focus input
+            messageInput.focus();
+        }
+
+        // Send Message
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            addUserMessage(message);
+            messageInput.value = '';
+            processUserInput(message);
+            scrollToBottom();
+        }
+
+        // Process User Input
+        function processUserInput(message) {
+            const lowerMessage = message.toLowerCase();
+
+            // Handle greetings with varied responses
+            if (lowerMessage.match(/^(hi|hello|hey|hii|hi there|hello there)/i)) {
+                const greetings = [
+                    "Hello! 👋 How can I help you with your nutrition today?",
+                    "Hi there! 🥗 Ready to explore some healthy food options?",
+                    "Hey! 👋 Looking for nutrition advice or want to track your food?",
+                    "Hello! 🍎 How can I assist you with your nutrition goals today?"
+                ];
+                addBotMessage(greetings[Math.floor(Math.random() * greetings.length)]);
+                return;
+            }
+            
+            // Handle direct logging commands (e.g., "log 1 apple", "log 2 bananas")
+            if (lowerMessage.startsWith('log ')) {
+                const logResult = handleDirectLogging(message);
+                if (logResult) {
+                    addBotMessage(logResult);
+                    return;
+                }
+            }
+            
+            // Handle search queries with varied responses
+            if (lowerMessage.includes('search') || lowerMessage.includes('find')) {
+                const query = message.replace(/search|find/i, '').trim();
+                const searchResponses = [
+                    `Let me find information about ${query} for you...`,
+                    `Searching for nutrition facts about ${query}...`,
+                    `I'll look up ${query} in our nutrition database...`
+                ];
+                addBotMessage(searchResponses[Math.floor(Math.random() * searchResponses.length)]);
+                searchFood(query);
+            }
+            else if (lowerMessage.includes('log') || lowerMessage.includes('add')) {
+                const query = message.replace(/log|add/i, '').trim();
+                const logResponses = [
+                    `Let's add ${query} to your food log...`,
+                    `I'll help you log ${query} in your daily nutrition...`,
+                    `Adding ${query} to track your nutrition goals...`
+                ];
+                addBotMessage(logResponses[Math.floor(Math.random() * logResponses.length)]);
+                searchFood(query);
+            }
+            else if (lowerMessage.includes('tip') || lowerMessage.includes('advice')) {
+                const query = message.replace(/tip|advice/i, '').trim();
+                const tipResponses = [
+                    `Let me share some nutrition tips about ${query}...`,
+                    `I'll provide some helpful advice about ${query}...`,
+                    `Here are some nutrition insights about ${query}...`
+                ];
+                addBotMessage(tipResponses[Math.floor(Math.random() * tipResponses.length)]);
+                getNutritionTips(query);
+            }
+            else {
+                const defaultResponses = [
+                    `Let me look up information about ${message}...`,
+                    `I'll search for nutrition facts about ${message}...`,
+                    `Let me find details about ${message} for you...`
+                ];
+                addBotMessage(defaultResponses[Math.floor(Math.random() * defaultResponses.length)]);
+                searchFood(message);
+            }
+        }
+
+        // Add new function to handle direct logging commands
+        function handleDirectLogging(message) {
+            const logPattern = /^log\s+(\d+(?:\.\d+)?)\s+(.+)$/i;
+            const match = message.match(logPattern);
+            
+            if (match) {
+                const quantity = parseFloat(match[1]);
+                const foodName = match[2].trim().toLowerCase();
+                
+                // Check if it's a common food
+                if (commonFoods[foodName]) {
+                    const food = commonFoods[foodName];
+                    const foodEntry = {
+                        name: `${food.name} (${quantity} serving${quantity !== 1 ? 's' : ''})`,
+                        nutrients: {
+                            calories: { 
+                                value: (food.nutrients?.calories?.value || 0) * quantity,
+                                unit: food.nutrients?.calories?.unit || 'kcal'
+                            },
+                            protein: {
+                                value: (food.nutrients?.protein?.value || 0) * quantity,
+                                unit: food.nutrients?.protein?.unit || 'g'
+                            },
+                            carbs: {
+                                value: (food.nutrients?.carbs?.value || 0) * quantity,
+                                unit: food.nutrients?.carbs?.unit || 'g'
+                            },
+                            fat: {
+                                value: (food.nutrients?.fat?.value || 0) * quantity,
+                                unit: food.nutrients?.fat?.unit || 'g'
+                            }
+                        },
+                        timestamp: new Date().toISOString()
+                    };
+
+                    // Add to daily log
+                    nutritionData.dailyLog.push(foodEntry);
+                    updateFoodLog();
+                    
+                    // Show success message
+                    const totals = calculateTotals();
+                    return `
+                        <div class="nutrition-card">
+                            <div class="nutrition-header">
+                                <h3 class="nutrition-title">✅ Added ${foodEntry.name} to your food log</h3>
+                            </div>
+                            <div class="nutrition-macros">
+                                <div class="macro-item">
+                                    <div class="macro-value">${Math.round(totals.calories)} kcal</div>
+                                    <div class="macro-label">Total Calories</div>
+                                </div>
+                                <div class="macro-item">
+                                    <div class="macro-value">${Math.round(totals.protein)}g</div>
+                                    <div class="macro-label">Total Protein</div>
+                                </div>
+                                <div class="macro-item">
+                                    <div class="macro-value">${Math.round(totals.carbs)}g</div>
+                                    <div class="macro-label">Total Carbs</div>
+                                </div>
+                                <div class="macro-item">
+                                    <div class="macro-value">${Math.round(totals.fat)}g</div>
+                                    <div class="macro-label">Total Fat</div>
+                                </div>
+                            </div>
+                            <div class="nutrition-details">
+                                <div class="detail-section">
+                                    <div class="detail-content">
+                                        Daily Progress:
+                                        <ul style="margin-top: 8px; list-style: none;">
+                                            <li>🎯 Calories: ${Math.round(totals.calories)}/${nutritionData.goals.calories} kcal (${Math.round(totals.calories/nutritionData.goals.calories*100)}%)</li>
+                                            <li>🎯 Protein: ${Math.round(totals.protein)}/${nutritionData.goals.protein}g (${Math.round(totals.protein/nutritionData.goals.protein*100)}%)</li>
+                                            <li>🎯 Carbs: ${Math.round(totals.carbs)}/${nutritionData.goals.carbs}g (${Math.round(totals.carbs/nutritionData.goals.carbs*100)}%)</li>
+                                            <li>🎯 Fat: ${Math.round(totals.fat)}/${nutritionData.goals.fat}g (${Math.round(totals.fat/nutritionData.goals.fat*100)}%)</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // If not a common food, search for it first
+                    searchFood(foodName);
+                    return "I'll help you find information about that food first...";
+                }
+            }
+            return null;
+        }
+
+        // Update nutrient mapping for better coverage
+        const nutrientMap = {
+            'Energy': 'calories',
+            'Protein': 'protein',
+            'Total lipid (fat)': 'fat',
+            'Carbohydrate, by difference': 'carbs',
+            'Fiber, total dietary': 'fiber',
+            'Sugars, total including NLEA': 'sugar',
+            'Sodium, Na': 'sodium',
+            'Calcium, Ca': 'calcium',
+            'Iron, Fe': 'iron',
+            'Potassium, K': 'potassium',
+            'Vitamin A, IU': 'vitaminA',
+            'Vitamin C, total ascorbic acid': 'vitaminC',
+            'Vitamin D (D2 + D3)': 'vitaminD',
+            'Vitamin E (alpha-tocopherol)': 'vitaminE',
+            'Vitamin K (phylloquinone)': 'vitaminK',
+            'Thiamin': 'vitaminB1',
+            'Riboflavin': 'vitaminB2',
+            'Niacin': 'vitaminB3',
+            'Vitamin B-6': 'vitaminB6',
+            'Folate, DFE': 'folate',
+            'Vitamin B-12': 'vitaminB12',
+            'Choline, total': 'choline',
+            'Magnesium, Mg': 'magnesium',
+            'Zinc, Zn': 'zinc',
+            'Selenium, Se': 'selenium',
+            'Copper, Cu': 'copper',
+            'Manganese, Mn': 'manganese',
+            'Cholesterol': 'cholesterol',
+            'Fatty acids, total saturated': 'saturatedFat',
+            'Fatty acids, total monounsaturated': 'monounsaturatedFat',
+            'Fatty acids, total polyunsaturated': 'polyunsaturatedFat',
+            'Fatty acids, total trans': 'transFat'
+        };
+
+        // Search Food with enhanced API integration
+        async function searchFood(query) {
+            showTypingIndicator();
+            
+            try {
+                // First check if it's a common food
+                const lowerQuery = query.toLowerCase();
+                if (commonFoods[lowerQuery]) {
+                    displayFoodInfo({...commonFoods[lowerQuery], source: 'Local Database'});
+                    return;
+                }
+
+                // Try USDA API with expanded search
+                const usdaResponse = await fetch(`${API_CONFIG.usda.baseUrl}/foods/search?api_key=${API_CONFIG.usda.apiKey}&query=${encodeURIComponent(query)}&pageSize=5&dataType=Survey (FNDDS),SR Legacy,Foundation,Branded`);
+                
+                if (!usdaResponse.ok) {
+                    throw new Error('USDA API request failed');
+                }
+                
+                const usdaData = await usdaResponse.json();
+                
+                if (usdaData.foods && usdaData.foods.length > 0) {
+                    // Get the best matching food from results
+                    const bestMatch = findBestMatch(usdaData.foods, query);
+                    const nutrients = extractEnhancedNutrients(bestMatch);
+                    
+                    // Get additional information from Wikipedia
+                    const wikiResponse = await fetch(`${API_CONFIG.wikipedia.baseUrl}?action=query&format=json&prop=extracts&exintro=true&explaintext=true&titles=${encodeURIComponent(query)}&origin=*`);
+                    const wikiData = await wikiResponse.json();
+                    const wikiExtract = wikiData.query?.pages ? Object.values(wikiData.query.pages)[0]?.extract : '';
+                    
+                    const foodInfo = {
+                        name: bestMatch.description,
+                        nutrients: nutrients,
+                        description: wikiExtract || bestMatch.description,
+                        source: 'USDA Database',
+                        brandOwner: bestMatch.brandOwner,
+                        servingSize: bestMatch.servingSize,
+                        servingSizeUnit: bestMatch.servingSizeUnit,
+                        category: bestMatch.foodCategory
+                    };
+                    
+                    displayFoodInfo(foodInfo);
+                    return;
+                }
+                
+                // If USDA fails, try Edamam API (you'll need to sign up for an API key)
+                try {
+                    const edamamResponse = await fetch(`https://api.edamam.com/api/food-database/v2/parser?app_id=YOUR_APP_ID&app_key=YOUR_APP_KEY&ingr=${encodeURIComponent(query)}`);
+                    if (edamamResponse.ok) {
+                        const edamamData = await edamamResponse.json();
+                        if (edamamData.hints && edamamData.hints.length > 0) {
+                            const bestMatch = edamamData.hints[0].food;
+                            const nutrients = {
+                                calories: { value: bestMatch.nutrients.ENERC_KCAL, unit: 'kcal' },
+                                protein: { value: bestMatch.nutrients.PROCNT, unit: 'g' },
+                                fat: { value: bestMatch.nutrients.FAT, unit: 'g' },
+                                carbs: { value: bestMatch.nutrients.CHOCDF, unit: 'g' },
+                                fiber: { value: bestMatch.nutrients.FIBTG, unit: 'g' }
+                            };
+                            
+                            const foodInfo = {
+                                name: bestMatch.label,
+                                nutrients: nutrients,
+                                description: `${bestMatch.label} - ${bestMatch.category}`,
+                                source: 'Edamam Database',
+                                category: bestMatch.category
+                            };
+                            
+                            displayFoodInfo(foodInfo);
+                            return;
+                        }
+                    }
+                } catch (edamamError) {
+                    console.error('Edamam API error:', edamamError);
+                }
+                
+                // If both APIs fail, try HuggingFace for general information
+                const hfResponse = await fetch(`${API_CONFIG.huggingface.baseUrl}/facebook/bart-large-cnn`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${API_CONFIG.huggingface.apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        inputs: `Provide nutritional information and health benefits of ${query}.`,
+                        parameters: {
+                            max_length: 250,
+                            min_length: 100,
+                            do_sample: false
+                        }
+                    })
+                });
+                
+                if (!hfResponse.ok) {
+                    throw new Error('HuggingFace API request failed');
+                }
+                
+                const hfData = await hfResponse.json();
+                
+                if (hfData && hfData[0]) {
+                    const foodInfo = {
+                        name: query,
+                        description: hfData[0].generated_text,
+                        source: 'AI Generated',
+                        nutrients: estimateNutrients(query, hfData[0].generated_text)
+                    };
+                    
+                    displayFoodInfo(foodInfo);
+                    return;
+                }
+                
+                addBotMessage("I couldn't find detailed information for that food. Please try another food item or rephrase your query.");
+                
+            } catch (error) {
+                console.error('Error searching food:', error);
+                addBotMessage("I'm having trouble accessing the nutrition database. Please try again in a moment.");
+            } finally {
+                    removeTypingIndicator();
+            }
+        }
+
+        // Helper function to find best matching food from USDA results
+        function findBestMatch(foods, query) {
+            const lowerQuery = query.toLowerCase();
+            return foods.reduce((best, current) => {
+                const currentScore = calculateMatchScore(current.description.toLowerCase(), lowerQuery);
+                const bestScore = calculateMatchScore(best.description.toLowerCase(), lowerQuery);
+                return currentScore > bestScore ? current : best;
+            }, foods[0]);
+        }
+
+        // Helper function to calculate match score
+        function calculateMatchScore(text, query) {
+            let score = 0;
+            if (text === query) score += 100;
+            else if (text.startsWith(query)) score += 50;
+            else if (text.includes(query)) score += 25;
+            return score;
+        }
+
+        // Enhanced nutrient extraction
+        function extractEnhancedNutrients(food) {
+            const nutrients = {};
+            
+            food.foodNutrients.forEach(nutrient => {
+                const key = nutrientMap[nutrient.nutrientName];
+                if (key) {
+                    nutrients[key] = {
+                        value: nutrient.value,
+                        unit: nutrient.unitName.toLowerCase(),
+                        name: nutrient.nutrientName
+                    };
+                }
+            });
+
+            return nutrients;
+        }
+
+        // Helper function to estimate nutrients from AI-generated text
+        function estimateNutrients(foodName, description) {
+            const nutrients = {
+                calories: { value: 0, unit: 'kcal' },
+                protein: { value: 0, unit: 'g' },
+                carbs: { value: 0, unit: 'g' },
+                fat: { value: 0, unit: 'g' }
+            };
+
+            // Extract numeric values followed by units
+            const calorieMatch = description.match(/(\d+)\s*(?:kcal|calories)/i);
+            const proteinMatch = description.match(/(\d+)\s*(?:g|grams)?\s*(?:of)?\s*protein/i);
+            const carbsMatch = description.match(/(\d+)\s*(?:g|grams)?\s*(?:of)?\s*(?:carbs|carbohydrates)/i);
+            const fatMatch = description.match(/(\d+)\s*(?:g|grams)?\s*(?:of)?\s*fat/i);
+
+            if (calorieMatch) nutrients.calories.value = parseInt(calorieMatch[1]);
+            if (proteinMatch) nutrients.protein.value = parseInt(proteinMatch[1]);
+            if (carbsMatch) nutrients.carbs.value = parseInt(carbsMatch[1]);
+            if (fatMatch) nutrients.fat.value = parseInt(fatMatch[1]);
+
+            return nutrients;
+        }
+
+        // Display Food Information
+        function displayFoodInfo(foodInfo) {
+            const nutritionHTML = `
+                <div class="nutrition-card">
+                    <div class="nutrition-header">
+                        <h3 class="nutrition-title">${foodInfo.name}</h3>
+                        <div class="action-buttons">
+                            <button class="view-details-btn" onclick="getDetailedFoodInfo('${foodInfo.name}')">
+                                <i class="fas fa-info-circle"></i> View Details
+                            </button>
+                            <button class="log-btn" onclick='logFood(${JSON.stringify(JSON.stringify(foodInfo))})'>
+                                <i class="fas fa-plus"></i> Log Food
+                            </button>
+                </div>
+                    </div>
+                    <div class="nutrition-macros">
+                        <div class="macro-item">
+                            <div class="macro-value">${foodInfo.nutrients?.calories?.value || 0}</div>
+                            <div class="macro-label">Calories</div>
+                        </div>
+                        <div class="macro-item">
+                            <div class="macro-value">${foodInfo.nutrients?.protein?.value || 0}g</div>
+                            <div class="macro-label">Protein</div>
+                        </div>
+                        <div class="macro-item">
+                            <div class="macro-value">${foodInfo.nutrients?.carbs?.value || 0}g</div>
+                            <div class="macro-label">Carbs</div>
+                        </div>
+                        <div class="macro-item">
+                            <div class="macro-value">${foodInfo.nutrients?.fat?.value || 0}g</div>
+                            <div class="macro-label">Fat</div>
+                        </div>
+                    </div>
+                    <div class="nutrition-details">
+                        <div class="detail-section">
+                            <div class="detail-title">Description</div>
+                            <div class="detail-content">${foodInfo.description || 'No description available'}</div>
+                        </div>
+                    </div>
+                    <div class="nutrition-footer">
+                        <small>Source: ${foodInfo.source || 'Database'}</small>
+                    </div>
+                </div>
+            `;
+            
+            addBotMessage(nutritionHTML);
+            showQuickSuggestions();
+        }
+
+        // Get Nutrition Tips
+        async function getNutritionTips(topic) {
+            showTypingIndicator();
+            try {
+                const lowerTopic = topic.toLowerCase();
+                
+                if (nutritionTipsData[lowerTopic]) {
+                    const tipData = nutritionTipsData[lowerTopic];
+                    // Randomly select one set of tips
+                    const randomTipSet = tipData.tips[Math.floor(Math.random() * tipData.tips.length)];
+                    const tipHTML = `
+                        <div class="nutrition-tip">
+                            <div class="tip-title">${tipData.title}</div>
+                            <div class="tip-content">
+                                <ul style="margin-top: 8px; padding-left: 20px;">
+                                    ${randomTipSet.map(tip => `<li>${tip}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                    addBotMessage(tipHTML);
+                    showQuickSuggestions();
+                    return;
+                }
+
+                // If topic not found in predefined tips, try to generate custom tips
+                const customTips = await generateCustomTips(topic);
+                if (customTips) {
+                    const tipHTML = `
+                        <div class="nutrition-tip">
+                            <div class="tip-title">Tips for ${topic}</div>
+                            <div class="tip-content">
+                                <ul style="margin-top: 8px; padding-left: 20px;">
+                                    ${customTips.map(tip => `<li>${tip}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                    addBotMessage(tipHTML);
+                } else {
+                    addBotMessage(`I couldn't find specific tips for "${topic}". Try these common topics: "healthy eating", "protein rich foods", or "weight loss".`);
+                }
+                showQuickSuggestions();
+                
+            } catch (error) {
+                console.error('Error getting nutrition tips:', error);
+                addBotMessage("I'm having trouble finding tips. Try searching for common topics like 'healthy eating', 'weight loss', or 'protein rich foods'.");
+                showQuickSuggestions();
+            } finally {
+                removeTypingIndicator();
+            }
+        }
+
+        // Add function to generate custom tips using HuggingFace
+        async function generateCustomTips(topic) {
+            try {
+                const response = await fetch(`${API_CONFIG.huggingface.baseUrl}/facebook/bart-large-cnn`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${API_CONFIG.huggingface.apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        inputs: `Provide 8 nutrition and health tips related to ${topic}.`,
+                        parameters: {
+                            max_length: 250,
+                            min_length: 100,
+                            do_sample: false
+                        }
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data[0]) {
+                        // Split the generated text into individual tips
+                        return data[0].generated_text
+                            .split(/\d+\.|•|-/)
+                            .map(tip => tip.trim())
+                            .filter(tip => tip.length > 0)
+                            .slice(0, 8);
+                    }
+                }
+                return null;
+            } catch (error) {
+                console.error('Error generating custom tips:', error);
+                return null;
+            }
+        }
+
+        // Update logFood function to show portion selection first
+        function logFood(foodInfoStr) {
+            const food = JSON.parse(foodInfoStr);
+            showPortionForm(food);
+        }
+
+        function showPortionForm(food) {
+            const formHTML = `
+                <div class="portion-form-overlay" onclick="closePortionForm()"></div>
+                <div class="portion-form">
+                    <h2>Select Portion Size for ${food.name}</h2>
+                    <div class="portion-options">
+                        <button class="portion-option" onclick="selectPortion(this, 0.5)">½ Serving</button>
+                        <button class="portion-option" onclick="selectPortion(this, 1)">1 Serving</button>
+                        <button class="portion-option" onclick="selectPortion(this, 2)">2 Servings</button>
+                        <button class="portion-option" onclick="selectPortion(this, 0.25)">¼ Serving</button>
+                        <button class="portion-option" onclick="selectPortion(this, 1.5)">1½ Serving</button>
+                        <button class="portion-option" onclick="selectPortion(this, 3)">3 Servings</button>
+                    </div>
+                    <div class="custom-portion">
+                        <input type="number" id="customAmount" placeholder="Custom amount" min="0" step="0.1">
+                        <select id="customUnit">
+                            <option value="serving">Serving</option>
+                            <option value="g">Grams</option>
+                            <option value="kg">Kilograms</option>
+                            <option value="oz">Ounces</option>
+                            <option value="lb">Pounds</option>
+                            <option value="cup">Cups</option>
+                            <option value="tbsp">Tablespoons</option>
+                            <option value="tsp">Teaspoons</option>
+                        </select>
+                    </div>
+                    <div class="form-actions" style="margin-top: 16px;">
+                        <button type="button" onclick="closePortionForm()" style="background: var(--border); color: var(--text);">Cancel</button>
+                        <button type="button" onclick='confirmPortion(${JSON.stringify(JSON.stringify(food))})' style="background: var(--primary); color: white;">Add to Log</button>
+                    </div>
+                </div>
+            `;
+            
+            const formContainer = document.createElement('div');
+            formContainer.id = 'portionFormContainer';
+            formContainer.innerHTML = formHTML;
+            document.body.appendChild(formContainer);
+        }
+
+        function closePortionForm() {
+            const formContainer = document.getElementById('portionFormContainer');
+            if (formContainer) {
+                formContainer.remove();
+            }
+        }
+
+        function selectPortion(button, value) {
+            // Remove selected class from all buttons
+            document.querySelectorAll('.portion-option').forEach(btn => btn.classList.remove('selected'));
+            // Add selected class to clicked button
+            button.classList.add('selected');
+            // Clear custom input
+            document.getElementById('customAmount').value = '';
+        }
+
+        function confirmPortion(foodInfoStr) {
+            const food = JSON.parse(foodInfoStr);
+            let multiplier = 1;
+            let unit = 'serving';
+            
+            // Check if a preset portion is selected
+            const selectedOption = document.querySelector('.portion-option.selected');
+            if (selectedOption) {
+                multiplier = parseFloat(selectedOption.onclick.toString().match(/\d*\.?\d+/)[0]);
+            }
+            
+            // Check if custom amount is entered
+            const customAmount = document.getElementById('customAmount').value;
+            const customUnit = document.getElementById('customUnit').value;
+            if (customAmount) {
+                multiplier = parseFloat(customAmount);
+                unit = customUnit;
+            }
+
+            // Convert weight-based portions to serving multiplier
+            if (unit !== 'serving') {
+                // Assume standard serving is 100g
+                const standardServing = 100;
+                switch (unit) {
+                    case 'g':
+                        multiplier = multiplier / standardServing;
+                        break;
+                    case 'kg':
+                        multiplier = (multiplier * 1000) / standardServing;
+                        break;
+                    case 'oz':
+                        multiplier = (multiplier * 28.35) / standardServing;
+                        break;
+                    case 'lb':
+                        multiplier = (multiplier * 453.6) / standardServing;
+                        break;
+                    case 'cup':
+                        multiplier = (multiplier * 240) / standardServing;
+                        break;
+                    case 'tbsp':
+                        multiplier = (multiplier * 15) / standardServing;
+                        break;
+                    case 'tsp':
+                        multiplier = (multiplier * 5) / standardServing;
+                        break;
+                }
+            }
+            
+            // Create food entry with adjusted nutrients
+            const foodEntry = {
+                name: `${food.name} (${customAmount ? customAmount + ' ' + customUnit : multiplier + ' serving'})`,
+                nutrients: {
+                    calories: { 
+                        value: (food.nutrients?.calories?.value || 0) * multiplier,
+                        unit: food.nutrients?.calories?.unit || 'kcal'
+                    },
+                    protein: {
+                        value: (food.nutrients?.protein?.value || 0) * multiplier,
+                        unit: food.nutrients?.protein?.unit || 'g'
+                    },
+                    carbs: {
+                        value: (food.nutrients?.carbs?.value || 0) * multiplier,
+                        unit: food.nutrients?.carbs?.unit || 'g'
+                    },
+                    fat: {
+                        value: (food.nutrients?.fat?.value || 0) * multiplier,
+                        unit: food.nutrients?.fat?.unit || 'g'
+                    }
+                },
+                timestamp: new Date().toISOString()
+            };
+
+            // Add to daily log
+            nutritionData.dailyLog.push(foodEntry);
+            updateFoodLog();
+            
+            // Show success message
+            const totals = calculateTotals();
+            const logHTML = `
+                <div class="nutrition-card">
+                    <div class="nutrition-header">
+                        <h3 class="nutrition-title">✅ Added ${foodEntry.name} to your food log</h3>
+                    </div>
+                    <div class="nutrition-macros">
+                        <div class="macro-item">
+                            <div class="macro-value">${Math.round(totals.calories)} kcal</div>
+                            <div class="macro-label">Total Calories</div>
+                        </div>
+                        <div class="macro-item">
+                            <div class="macro-value">${Math.round(totals.protein)}g</div>
+                            <div class="macro-label">Total Protein</div>
+                        </div>
+                        <div class="macro-item">
+                            <div class="macro-value">${Math.round(totals.carbs)}g</div>
+                            <div class="macro-label">Total Carbs</div>
+                        </div>
+                        <div class="macro-item">
+                            <div class="macro-value">${Math.round(totals.fat)}g</div>
+                            <div class="macro-label">Total Fat</div>
+                        </div>
+                    </div>
+                    <div class="nutrition-details">
+                        <div class="detail-section">
+                            <div class="detail-content">
+                                Daily Progress:
+                                <ul style="margin-top: 8px; list-style: none;">
+                                    <li>🎯 Calories: ${Math.round(totals.calories)}/${nutritionData.goals.calories} kcal (${Math.round(totals.calories/nutritionData.goals.calories*100)}%)</li>
+                                    <li>🎯 Protein: ${Math.round(totals.protein)}/${nutritionData.goals.protein}g (${Math.round(totals.protein/nutritionData.goals.protein*100)}%)</li>
+                                    <li>🎯 Carbs: ${Math.round(totals.carbs)}/${nutritionData.goals.carbs}g (${Math.round(totals.carbs/nutritionData.goals.carbs*100)}%)</li>
+                                    <li>🎯 Fat: ${Math.round(totals.fat)}/${nutritionData.goals.fat}g (${Math.round(totals.fat/nutritionData.goals.fat*100)}%)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            closePortionForm();
+            addBotMessage(logHTML);
+            
+            // Show default message after logging
+            setTimeout(() => {
+                const defaultMessage = `
+                    <div class="message bot-message">
+                        <p>What else would you like to do?</p>
+                        <div class="quick-suggestions">
+                            <button class="suggestion-btn" onclick="handleSuggestion('search food')">
+                                <i class="fas fa-search"></i> Search Food
+                            </button>
+                            <button class="suggestion-btn" onclick="handleSuggestion('food tips')">
+                                <i class="fas fa-lightbulb"></i> Food Tips
+                            </button>
+                            <button class="suggestion-btn" onclick="handleSuggestion('log food')">
+                                <i class="fas fa-utensils"></i> Log Food
+                            </button>
+                        </div>
+                    </div>
+                `;
+                addBotMessage(defaultMessage);
+            }, 500);
+        }
+
+        // Calculate totals from daily log
+        function calculateTotals() {
+            return nutritionData.dailyLog.reduce((totals, food) => {
+                totals.calories += food.nutrients.calories.value || 0;
+                totals.protein += food.nutrients.protein.value || 0;
+                totals.carbs += food.nutrients.carbs.value || 0;
+                totals.fat += food.nutrients.fat.value || 0;
+                return totals;
+            }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+        }
+
+        // Update Daily Totals
+        function updateDailyTotals() {
+            const today = new Date().getDay();
+            nutritionData.weeklyStats.calories[today] = nutritionData.dailyLog.reduce((sum, item) => sum + (item.nutrients.calories.value || 0), 0);
+            nutritionData.weeklyStats.protein[today] = nutritionData.dailyLog.reduce((sum, item) => sum + (item.nutrients.protein.value || 0), 0);
+            nutritionData.weeklyStats.carbs[today] = nutritionData.dailyLog.reduce((sum, item) => sum + (item.nutrients.carbs.value || 0), 0);
+            nutritionData.weeklyStats.fat[today] = nutritionData.dailyLog.reduce((sum, item) => sum + (item.nutrients.fat.value || 0), 0);
+        }
+
+        // Add User Message
+        function addUserMessage(text) {
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message user-message';
+            messageElement.innerHTML = `
+                <p>${text}</p>
+                <div class="message-time">${getCurrentTime()}</div>
+            `;
+            chatMessages.appendChild(messageElement);
+            scrollToBottom();
+        }
+
+        // Add Bot Message
+        function addBotMessage(message) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message bot-message';
+            messageDiv.innerHTML = message;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // If this is a food logging confirmation message, show the default message after a delay
+            if (message.includes('Added') && message.includes('to your food log')) {
+                setTimeout(() => {
+                    const defaultMessage = `
+                        <div class="message bot-message">
+                            <p>What else would you like to do?</p>
+                            <div class="quick-suggestions">
+                                <button class="suggestion-btn" onclick="handleSuggestion('search food')">
+                                    <i class="fas fa-search"></i> Search Food
+                                </button>
+                                <button class="suggestion-btn" onclick="handleSuggestion('food tips')">
+                                    <i class="fas fa-lightbulb"></i> Food Tips
+                                </button>
+                                <button class="suggestion-btn" onclick="handleSuggestion('log food')">
+                                    <i class="fas fa-utensils"></i> Log Food
+                                </button>
+                </div>
+                        </div>
+            `;
+                    addBotMessage(defaultMessage);
+                }, 500);
+        }
+        }
+
+        // Show Typing Indicator
+        function showTypingIndicator() {
+            const typingElement = document.createElement('div');
+            typingElement.className = 'typing-indicator';
+            typingElement.id = 'typing-indicator';
+            typingElement.innerHTML = `
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            `;
+            chatMessages.appendChild(typingElement);
+            scrollToBottom();
+        }
+
+        function removeTypingIndicator() {
+            const typingElement = document.getElementById('typing-indicator');
+            if (typingElement) typingElement.remove();
+        }
+
+        // Toggle Theme
+        function toggleTheme() {
+            const body = document.body;
+            const isDarkMode = body.classList.toggle('dark-mode');
+            
+            // Update theme icon
+            const themeIcon = document.getElementById('theme-icon');
+            if (isDarkMode) {
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            } else {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+            
+            // Save theme preference
+            localStorage.setItem('darkMode', isDarkMode);
+            
+            // Update all elements that need theme-specific styling
+            updateThemeStyles(isDarkMode);
+        }
+
+        function updateThemeStyles(isDarkMode) {
+            // Update chat messages
+            const messages = document.querySelectorAll('.message');
+            messages.forEach(message => {
+                if (message.classList.contains('user-message')) {
+                    message.style.backgroundColor = isDarkMode ? 'var(--primary-dark)' : 'var(--primary)';
+                } else {
+                    message.style.backgroundColor = isDarkMode ? 'var(--card-bg)' : 'var(--bg)';
+                    message.style.color = isDarkMode ? 'var(--text)' : 'var(--text)';
+                }
+            });
+
+            // Update input field
+            const messageInput = document.querySelector('.message-input');
+            if (messageInput) {
+                messageInput.style.backgroundColor = isDarkMode ? 'var(--input-bg)' : 'var(--input-bg)';
+                messageInput.style.color = isDarkMode ? 'var(--text)' : 'var(--text)';
+                messageInput.style.borderColor = isDarkMode ? 'var(--input-border)' : 'var(--input-border)';
+            }
+
+            // Update buttons
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(button => {
+                if (button.classList.contains('send-btn')) {
+                    button.style.backgroundColor = isDarkMode ? 'var(--button-bg)' : 'var(--button-bg)';
+                    button.style.color = isDarkMode ? 'var(--button-text)' : 'var(--button-text)';
+                } else if (button.classList.contains('suggestion-btn')) {
+                    button.style.backgroundColor = isDarkMode ? 'var(--bg)' : 'var(--bg)';
+                    button.style.color = isDarkMode ? 'var(--text)' : 'var(--text)';
+                    button.style.borderColor = isDarkMode ? 'var(--border)' : 'var(--border)';
+                }
+            });
+
+            // Update nutrition cards
+            const cards = document.querySelectorAll('.nutrition-card');
+            cards.forEach(card => {
+                card.style.backgroundColor = isDarkMode ? 'var(--card-bg)' : 'var(--card-bg)';
+                card.style.borderColor = isDarkMode ? 'var(--border)' : 'var(--border)';
+            });
+
+            // Update modals
+            const modals = document.querySelectorAll('.goal-form, .portion-form');
+            modals.forEach(modal => {
+                modal.style.backgroundColor = isDarkMode ? 'var(--modal-bg)' : 'var(--modal-bg)';
+                modal.style.borderColor = isDarkMode ? 'var(--modal-border)' : 'var(--modal-border)';
+            });
+        }
+
+        // Initialize theme on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('darkMode') === 'true';
+            if (savedTheme) {
+                document.body.classList.add('dark-mode');
+                const themeIcon = document.getElementById('theme-icon');
+                themeIcon.classList.replace('fa-moon', 'fa-sun');
+            }
+            updateThemeStyles(savedTheme);
+        });
+
+        // Get Current Time
+        function getCurrentTime() {
+            return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Scroll to Bottom
+        function scrollToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Quick Reply Handler
+        function sendQuickReply(message) {
+            addUserMessage(message);
+            processUserInput(message);
+        }
+
+        // Initialize when DOM loads
+        document.addEventListener('DOMContentLoaded', initChatbot);
+
+        async function getDetailedFoodInfo(foodName) {
+            showTypingIndicator();
+            try {
+                // Get Wikipedia description with food-specific query
+                const wikiResponse = await fetch(`${API_CONFIG.wikipedia.baseUrl}?action=query&format=json&prop=extracts&exintro=true&explaintext=true&titles=${encodeURIComponent(foodName + ' fruit')}&origin=*`);
+                const wikiData = await wikiResponse.json();
+                let wikiExtract = wikiData.query?.pages ? Object.values(wikiData.query.pages)[0]?.extract : '';
+                
+                // If first attempt fails, try with "food" suffix
+                if (!wikiExtract || wikiExtract.includes('radio') || wikiExtract.includes('station')) {
+                    const fallbackResponse = await fetch(`${API_CONFIG.wikipedia.baseUrl}?action=query&format=json&prop=extracts&exintro=true&explaintext=true&titles=${encodeURIComponent(foodName + ' food')}&origin=*`);
+                    const fallbackData = await fallbackResponse.json();
+                    wikiExtract = fallbackData.query?.pages ? Object.values(fallbackData.query.pages)[0]?.extract : '';
+                }
+                
+                // Get USDA data
+                const usdaResponse = await fetch(`${API_CONFIG.usda.baseUrl}/foods/search?api_key=${API_CONFIG.usda.apiKey}&query=${encodeURIComponent(foodName)}&pageSize=1&dataType=SR Legacy,Survey (FNDDS)`);
+                const usdaData = await usdaResponse.json();
+                
+                let detailedInfo = '';
+                if (usdaData.foods && usdaData.foods.length > 0) {
+                    const food = usdaData.foods[0];
+                    const nutrients = extractEnhancedNutrients(food);
+                    
+                    // Add common descriptions for popular foods if Wikipedia fails
+                    if (!wikiExtract) {
+                        const commonDescriptions = {
+                            'kiwi': 'Kiwi fruit, also known as Chinese gooseberry, is a sweet and tangy fruit with fuzzy brown skin and bright green flesh. It\'s packed with vitamins, minerals, and antioxidants.',
+                            'apple': 'Apples are crisp, sweet fruits that come in many varieties. They are rich in fiber and antioxidants.',
+                            'banana': 'Bananas are sweet tropical fruits that are rich in potassium and provide quick energy through natural sugars.',
+                            // Add more common foods as needed
+                        };
+                        wikiExtract = commonDescriptions[foodName.toLowerCase()] || 'A nutritious food item.';
+                    }
+                    
+                    detailedInfo = `
+                        <div class="nutrition-card">
+                            <div class="nutrition-header">
+                                <h3 class="nutrition-title">Detailed Information for ${foodName}</h3>
+                            </div>
+                            <div class="nutrition-details">
+                                <div class="detail-section">
+                                    <div class="detail-title">Description</div>
+                                    <div class="detail-content">${wikiExtract || 'No detailed description available'}</div>
+                        </div>
+                                <div class="detail-section">
+                                    <div class="detail-title">Nutritional Information</div>
+                                    <div class="detail-content">
+                                        <ul style="list-style: none; padding: 0;">
+                                            ${Object.entries(nutrients)
+                                                .filter(([key, value]) => value.value > 0)
+                                                .map(([key, value]) => `
+                                                    <li style="margin: 8px 0;">
+                                                        <strong>${key.charAt(0).toUpperCase() + key.slice(1)}:</strong> 
+                                                        ${value.value}${value.unit}
+                                                    </li>
+                    `).join('')}
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="detail-section">
+                                    <div class="detail-title">Health Benefits</div>
+                                    <div class="detail-content">
+                                        ${generateEnhancedHealthBenefits(nutrients)}
+                                    </div>
+                                </div>
+                            </div>
+                </div>
+            `;
+                } else {
+                    detailedInfo = `
+                        <div class="nutrition-card">
+                            <div class="nutrition-header">
+                                <h3 class="nutrition-title">Detailed Information for ${foodName}</h3>
+                            </div>
+                            <div class="nutrition-details">
+                                <div class="detail-section">
+                                    <div class="detail-content">${wikiExtract || 'No detailed information available for this food item.'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                addBotMessage(detailedInfo);
+                showQuickSuggestions();
+            } catch (error) {
+                console.error('Error getting detailed food info:', error);
+                addBotMessage("Sorry, I couldn't fetch detailed information for this food.");
+                showQuickSuggestions();
+            } finally {
+                removeTypingIndicator();
+            }
+        }
+
+        // Enhanced health benefits generator
+        function generateEnhancedHealthBenefits(nutrients) {
+            const benefits = [];
+            
+            // Protein benefits
+            if (nutrients.protein?.value > 5) {
+                benefits.push('High in protein, essential for muscle building, repair, and maintaining healthy tissues');
+            }
+            
+            // Fiber benefits
+            if (nutrients.fiber?.value > 2) {
+                benefits.push('Good source of fiber, which aids digestion, promotes satiety, and helps maintain healthy blood sugar levels');
+            }
+            
+            // Vitamin C benefits
+            if (nutrients.vitaminC?.value > 20) {
+                benefits.push('Rich in Vitamin C, which supports immune function, skin health, and acts as an antioxidant');
+            }
+            
+            // Calcium benefits
+            if (nutrients.calcium?.value > 100) {
+                benefits.push('Good source of calcium, important for bone health, muscle function, and nerve signaling');
+            }
+            
+            // Iron benefits
+            if (nutrients.iron?.value > 1) {
+                benefits.push('Contains iron, which is essential for healthy blood cells and oxygen transport');
+            }
+            
+            // Potassium benefits
+            if (nutrients.potassium?.value > 200) {
+                benefits.push('Good source of potassium, which helps regulate blood pressure and supports heart health');
+            }
+            
+            // Vitamin A benefits
+            if (nutrients.vitaminA?.value > 50) {
+                benefits.push('Contains Vitamin A, important for vision, immune function, and skin health');
+            }
+            
+            // Low sodium benefit
+            if (nutrients.sodium?.value < 50) {
+                benefits.push('Low in sodium, making it heart-healthy and suitable for blood pressure management');
+            }
+            
+            // Antioxidant benefits (if high in vitamins C, A, or E)
+            if ((nutrients.vitaminC?.value > 20) || (nutrients.vitaminA?.value > 50) || (nutrients.vitaminE?.value > 2)) {
+                benefits.push('Contains antioxidants that help protect cells from damage and support overall health');
+            }
+            
+            return benefits.length > 0 
+                ? `<ul style="margin-top: 8px; padding-left: 20px;"><li>${benefits.join('</li><li>')}</li></ul>`
+                : 'No specific health benefits information available.';
+        }
+
+        // Update the setGoals function
+        function setGoals() {
+            const formHTML = `
+                <div class="goal-form-overlay" onclick="closeGoalForm()"></div>
+                <div class="goal-form">
+                    <h2>Set Daily Nutrition Goals</h2>
+                    <form id="goalForm" onsubmit="saveGoals(event)">
+                        <div class="form-group">
+                            <label for="calories">Daily Calories (kcal)</label>
+                            <input type="number" id="calories" name="calories" value="${nutritionData.goals.calories}" required min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="protein">Protein Goal (g)</label>
+                            <input type="number" id="protein" name="protein" value="${nutritionData.goals.protein}" required min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="carbs">Carbs Goal (g)</label>
+                            <input type="number" id="carbs" name="carbs" value="${nutritionData.goals.carbs}" required min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="fat">Fat Goal (g)</label>
+                            <input type="number" id="fat" name="fat" value="${nutritionData.goals.fat}" required min="0">
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" onclick="closeGoalForm()" style="background: var(--border); color: var(--text);">Cancel</button>
+                            <button type="submit" style="background: var(--primary); color: white;">Save Goals</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            const formContainer = document.createElement('div');
+            formContainer.id = 'goalFormContainer';
+            formContainer.innerHTML = formHTML;
+            document.body.appendChild(formContainer);
+        }
+
+        function closeGoalForm() {
+            const formContainer = document.getElementById('goalFormContainer');
+            if (formContainer) {
+                formContainer.remove();
+            }
+        }
+
+        function saveGoals(event) {
+            event.preventDefault();
+            
+            const newGoals = {
+                calories: parseInt(document.getElementById('calories').value),
+                protein: parseInt(document.getElementById('protein').value),
+                carbs: parseInt(document.getElementById('carbs').value),
+                fat: parseInt(document.getElementById('fat').value)
+            };
+            
+            nutritionData.goals = newGoals;
+            updateFoodLog();
+            closeGoalForm();
+            
+            addBotMessage(`
+                <div class="nutrition-card">
+                    <div class="nutrition-header">
+                        <h3 class="nutrition-title">✅ Goals Updated Successfully</h3>
+                    </div>
+                    <div class="nutrition-details">
+                        <div class="detail-content">
+                            <p>Your new daily goals:</p>
+                            <ul style="margin-top: 8px; list-style: none;">
+                                <li>🎯 Calories: ${newGoals.calories} kcal</li>
+                                <li>🎯 Protein: ${newGoals.protein}g</li>
+                                <li>🎯 Carbs: ${newGoals.carbs}g</li>
+                                <li>🎯 Fat: ${newGoals.fat}g</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `);
+        }
+
+        // Update the updateFoodLog function
+        function updateFoodLog() {
+            const totalCalories = document.getElementById('total-calories');
+            const totalProtein = document.getElementById('total-protein');
+            const totalCarbs = document.getElementById('total-carbs');
+            const totalFat = document.getElementById('total-fat');
+            
+            let calories = 0, protein = 0, carbs = 0, fat = 0;
+            
+            nutritionData.dailyLog.forEach(food => {
+                calories += food.nutrients.calories.value || 0;
+                protein += food.nutrients.protein.value || 0;
+                carbs += food.nutrients.carbs.value || 0;
+                fat += food.nutrients.fat.value || 0;
+            });
+            
+            // Update the display with progress bars
+            updateNutrientDisplay('total-calories', calories, nutritionData.goals.calories, 'kcal');
+            updateNutrientDisplay('total-protein', protein, nutritionData.goals.protein, 'g');
+            updateNutrientDisplay('total-carbs', carbs, nutritionData.goals.carbs, 'g');
+            updateNutrientDisplay('total-fat', fat, nutritionData.goals.fat, 'g');
+        }
+
+        function updateNutrientDisplay(elementId, value, goal, unit) {
+            const element = document.getElementById(elementId);
+            const percentage = (value / goal) * 100;
+            const progressClass = percentage < 90 ? 'progress-under' : 
+                                 percentage <= 110 ? 'progress-good' : 
+                                 'progress-over';
+            
+            element.innerHTML = `
+                <div class="nutrient-value">
+                    <span>${Math.round(value)}${unit}</span>
+                    <span class="nutrient-goal">Goal: ${goal}${unit}</span>
+                </div>
+                <div class="nutrient-progress">
+                    <div class="progress-bar ${progressClass}" style="width: ${Math.min(percentage, 100)}%"></div>
+                </div>
+            `;
+        }
+
+        // New functions for the updated UI
+        function resetDailyLog() {
+            if (confirm('Are you sure you want to reset your daily food log?')) {
+                nutritionData.dailyLog = [];
+                updateFoodLog();
+                addBotMessage('🔄 Daily food log has been reset.');
+            }
+        }
+
+        // Add new function to handle suggestions
+        function handleSuggestion(type) {
+            const messages = {
+                'search food': {
+                    user: 'Search food',
+                    bot: `
+                        What food would you like to learn about? I can help you find:
+                        <div class="quick-suggestions">
+                            <button class="suggestion-btn" onclick="searchFood('apple')">Apple</button>
+                            <button class="suggestion-btn" onclick="searchFood('banana')">Banana</button>
+                            <button class="suggestion-btn" onclick="searchFood('chicken breast')">Chicken Breast</button>
+                        </div>
+                        <p style="margin-top: 8px;">Or type any food you're curious about!</p>
+                    `
+                },
+                'food tips': {
+                    user: 'Food tips',
+                    bot: `
+                        Looking for nutrition advice? I can help with:
+                        <div class="quick-suggestions">
+                            <button class="suggestion-btn" onclick="getNutritionTips('healthy eating')">Healthy Eating</button>
+                            <button class="suggestion-btn" onclick="getNutritionTips('weight loss')">Weight Loss</button>
+                            <button class="suggestion-btn" onclick="getNutritionTips('protein rich foods')">Protein Rich Foods</button>
+                        </div>
+                        <p style="margin-top: 8px;">Or ask about any nutrition topic you're interested in!</p>
+                    `
+                },
+                'log food': {
+                    user: 'Log food',
+                    bot: `
+                        You can log food in two ways:
+                        <div style="margin: 12px 0;">
+                            <p><strong>1. Direct Logging:</strong> Type "log [amount] [food]"</p>
+                            <div class="quick-suggestions">
+                                <button class="suggestion-btn" onclick="sendQuickReply('log 1 apple')">log 1 apple</button>
+                                <button class="suggestion-btn" onclick="sendQuickReply('log 2 banana')">log 2 banana</button>
+                                <button class="suggestion-btn" onclick="sendQuickReply('log 1.5 chicken breast')">log 1.5 chicken breast</button>
+                            </div>
+                        </div>
+                        <div style="margin: 12px 0;">
+                            <p><strong>2. Search and Log:</strong> Search for a food first, then log it with portion control</p>
+                            <div class="quick-suggestions">
+                                <button class="suggestion-btn" onclick="searchFood('apple')">Search Apple</button>
+                                <button class="suggestion-btn" onclick="searchFood('banana')">Search Banana</button>
+                                <button class="suggestion-btn" onclick="searchFood('chicken breast')">Search Chicken Breast</button>
+                            </div>
+                        </div>
+                        <p style="margin-top: 8px;">Try logging some food to track your daily nutrition goals!</p>
+                    `
+                }
+            };
+
+            if (messages[type]) {
+                addUserMessage(messages[type].user);
+                addBotMessage(messages[type].bot);
+            }
+        }
+
+        // Add helper function to generate health benefits based on nutrients
+        function generateHealthBenefits(nutrients) {
+            const benefits = [];
+            
+            if (nutrients.protein?.value > 10) {
+                benefits.push('High in protein, good for muscle building and repair');
+            }
+            if (nutrients.fiber?.value > 3) {
+                benefits.push('Good source of fiber, aids in digestion');
+            }
+            if (nutrients.vitaminC?.value > 20) {
+                benefits.push('Rich in Vitamin C, supports immune system');
+            }
+            if (nutrients.calcium?.value > 100) {
+                benefits.push('Good source of calcium, supports bone health');
+            }
+            if (nutrients.iron?.value > 2) {
+                benefits.push('Contains iron, important for blood health');
+            }
+            
+            return benefits.length > 0 
+                ? `<ul style="margin-top: 8px; padding-left: 20px;"><li>${benefits.join('</li><li>')}</li></ul>`
+                : 'No specific health benefits information available.';
+        }
+
+        // Add helper function to show quick suggestions
+        function showQuickSuggestions() {
+            const suggestionsHTML = `
+                <div class="message bot-message">
+                    <p>What else would you like to know?</p>
+                    <div class="quick-suggestions">
+                        <button class="suggestion-btn" onclick="handleSuggestion('search food')">
+                            <i class="fas fa-search"></i> Search Food
+                        </button>
+                        <button class="suggestion-btn" onclick="handleSuggestion('food tips')">
+                            <i class="fas fa-lightbulb"></i> Food Tips
+                        </button>
+                        <button class="suggestion-btn" onclick="handleSuggestion('log food')">
+                            <i class="fas fa-utensils"></i> Log Food
+                        </button>
+                    </div>
+                </div>
+            `;
+            addBotMessage(suggestionsHTML);
+        }
+    </script>
+</body>
+</html>
